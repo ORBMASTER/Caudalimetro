@@ -1,0 +1,34 @@
+
+volatile int CantPulsos;    //Variable que acumula los pulsos recibidos
+int LxM;            //Variable que acumula el calculo de Litros por Minuto 
+int Galon;
+int Metros;
+int pinsensor = 2;        //Numero de pin donde conectamos el sensor
+float FacConv = 7.5;         //Factor de Conversion para calcular caudal
+void rpm ()  {            //Función que se ejecuta durante la interrupción
+   CantPulsos++;        //Incrementa el contador de pulsos
+} 
+void setup() { 
+   pinMode(pinsensor, INPUT);         //inicializa el pin digital 2 como entrada
+   Serial.begin(9600);             //inicializa el puerto serie
+   attachInterrupt(0, rpm, RISING);     //(Interrupcion 0(Pin2),funcion rpm,Flanco de subida, cuando pasa de LOW a HIGH)
+} 
+void loop () {
+   CantPulsos = 0;    
+  //Pone en 0 el contador de pulsos
+  interrupts();                    //Habilitamos las interrupciones, equivalente a sei();
+  delay (1000);                  //Esperamos un segundo
+  noInterrupts();                    //Deshabilitamos las interrupciones, equivalente a cli();
+  //pagina de conversion
+  //https://www.advancedconverter.com/es/conversion-de-unidades/convertir-flujo/galones-por-minuto-a-litros-por-segundo
+  LxM = (CantPulsos / FacConv);
+   Galon = LxM*0.264172; 
+   Metros=LxM*.001;
+  //Calcula los Litros por Minuto 
+  Serial.print (Galon, DEC);         //Imprime la cantidad de galones por minuto
+  Serial.print (" G minrn");
+Serial.print (Metros, 3);         //Imprime la cantidad de metroscubicos por minuto
+  Serial.print (" MC minrn");  
+  Serial.print (LxM, DEC);         //Imprime la cantidad de litros por minuto
+  Serial.println (" L minrn");         //Imprime "L/min" y salta a una nueva linea
+}
